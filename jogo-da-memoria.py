@@ -13,9 +13,9 @@ class JogoDaMemoria:
         self.base_path = os.path.dirname(os.path.abspath(__file__))  # Caminho da pasta do script
 
         # Carregar música de fundo
-        self.background_music = "on_and_on.mp3"  # Substitua com o caminho da sua música
+        self.background_music = "dont_fail.mp3"  # Substitua com o caminho da sua música
         pg.mixer.music.load(self.background_music)
-        pg.mixer.music.set_volume(0.1)  # Define o volume da música (0.0 a 1.0)
+        pg.mixer.music.set_volume(0.5)  # Define o volume da música (0.0 a 1.0)
         pg.mixer.music.play(-1, 0.0)  # Começa a música em loop
 
         # Cores
