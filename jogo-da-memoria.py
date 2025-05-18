@@ -6,9 +6,17 @@ import pygame as pg
 class JogoDaMemoria:
     def __init__(self):
         pg.init()  # Inicia o Pygame
+        pg.mixer.init()  # Inicializa o mixer de som
+
         self.clock = pg.time.Clock()
 
         self.base_path = os.path.dirname(os.path.abspath(__file__))  # Caminho da pasta do script
+
+        # Carregar música de fundo
+        self.background_music = "on_and_on.mp3"  # Substitua com o caminho da sua música
+        pg.mixer.music.load(self.background_music)
+        pg.mixer.music.set_volume(0.1)  # Define o volume da música (0.0 a 1.0)
+        pg.mixer.music.play(-1, 0.0)  # Começa a música em loop
 
         # Cores
         self.white = (255, 255, 255)
@@ -75,7 +83,7 @@ class JogoDaMemoria:
         }
 
     def clear_window(self):
-        self.window.fill(self.black) #Essa parte muda o fundo do jogo
+        self.window.fill(self.black)  # Essa parte muda o fundo do jogo
 
     def blit_card(self, card, x, y):
         card_x = 50 + (x * 200)
@@ -208,6 +216,7 @@ if __name__ == "__main__":
 
         for event in pg.event.get():
             if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
+                pg.mixer.music.stop()  # Para a música ao sair
                 pg.quit()
                 sys.exit()
 
