@@ -5,10 +5,10 @@ import pygame as pg
 
 class JogoDaMemoria:
     def __init__(self):
-        pg.init()
+        pg.init()  # Inicia o Pygame
         self.clock = pg.time.Clock()
 
-        self.base_path = os.path.dirname(os.path.abspath(__file__))  # caminho da pasta do script
+        self.base_path = os.path.dirname(os.path.abspath(__file__))  # Caminho da pasta do script
 
         # Cores
         self.white = (255, 255, 255)
@@ -25,16 +25,17 @@ class JogoDaMemoria:
         self.font = pg.font.SysFont(None, 48)
 
         # Estado do jogo
-        self.cards = [['#'] * 5 for _ in range(4)]         # Cartas visíveis (ex.: '#', '', ou número)
-        self.cards_map = [[''] * 5 for _ in range(4)]      # Mapa real das cartas (números)
-        self.cards_in_play = []                            # Cartas viradas atualmente
-        self.waiting = False                               # Flag para esperar antes de virar cartas
-        self.delay_timer = 0                               # Temporizador para espera
-        self.shuffle_cards = True                          # Flag para embaralhar cartas
-        self.restart_option = False                        # Mostrar opção de reiniciar
-        self.last_left_click = False                       # Estado do clique anterior do mouse
+        self.state = "start"
+        self.cards = [['#'] * 5 for _ in range(4)]
+        self.cards_map = [[''] * 5 for _ in range(4)]
+        self.cards_in_play = []
+        self.waiting = False
+        self.delay_timer = 0
+        self.shuffle_cards = True
+        self.restart_option = False
+        self.last_left_click = False
 
-        # Carrega as imagens
+        # Carrega recursos
         self.load_images()
 
     def load_images(self):
@@ -44,24 +45,22 @@ class JogoDaMemoria:
                 return pg.transform.scale(pg.image.load(path), (100, 100))
             except FileNotFoundError:
                 print(f"Imagem não encontrada: {path}")
-                return pg.Surface((100, 100))  # imagem em branco
+                return pg.Surface((100, 100))
 
-        # Cartas de fundo e frente
         try:
-            path_down = os.path.join(self.base_path, 'Carta para baixo.png')
+            path_down = os.path.join(self.base_path, 'carta_para_baixo.png')
             self.card_down = pg.transform.scale(pg.image.load(path_down), (150, 150))
         except FileNotFoundError:
             print(f"Erro: '{path_down}' não encontrada.")
             self.card_down = pg.Surface((150, 150))
 
         try:
-            path_up = os.path.join(self.base_path, 'Carta para cima.png')
+            path_up = os.path.join(self.base_path, 'carta_para_cima.png')
             self.card_up = pg.transform.scale(pg.image.load(path_up), (150, 150))
         except FileNotFoundError:
             print(f"Erro: '{path_up}' não encontrada.")
             self.card_up = pg.Surface((150, 150))
 
-        # Imagens das cartas
         self.images = {
             '0': load_image('sport.png'),
             '1': load_image('vasco.png'),
@@ -76,7 +75,7 @@ class JogoDaMemoria:
         }
 
     def clear_window(self):
-        self.window.fill(self.white)
+        self.window.fill(self.black) #Essa parte muda o fundo do jogo
 
     def blit_card(self, card, x, y):
         card_x = 50 + (x * 200)
@@ -84,7 +83,7 @@ class JogoDaMemoria:
 
         if card == '#':
             self.window.blit(self.card_down, (card_x, card_y))
-        elif card == '':
+        elif card == '':  # Caso a carta esteja vazia
             pass
         else:
             self.window.blit(self.card_up, (card_x, card_y))
@@ -99,9 +98,7 @@ class JogoDaMemoria:
 
     def shuffling_cards(self):
         if self.shuffle_cards:
-            # Zera o mapa das cartas antes de distribuir
             self.cards_map = [[''] * 5 for _ in range(4)]
-
             for card in range(20):
                 placed = False
                 while not placed:
@@ -123,7 +120,6 @@ class JogoDaMemoria:
 
                 if self.cards[y][x] == '#':
                     if card_x <= mouse_pos[0] <= card_x + 150 and card_y <= mouse_pos[1] <= card_y + 150:
-                        # Desenha retângulo vermelho quando mouse está sobre a carta
                         pg.draw.rect(self.window, self.red, (card_x - 10, card_y - 10, 170, 170), 5, 15)
 
                         if click_just_pressed:
@@ -173,22 +169,42 @@ class JogoDaMemoria:
             box_y = (self.window.get_height() - box_height) // 2
 
             hovered = box_x <= mouse[0][0] <= box_x + box_width and box_y <= mouse[0][1] <= box_y + box_height
-
             color = self.green_light if hovered else self.green
+
             pg.draw.rect(self.window, color, (box_x, box_y, box_width, box_height))
             pg.draw.rect(self.window, self.black, (box_x, box_y, box_width, box_height), 5)
-
             self.window.blit(text, ((self.window.get_width() - width) // 2, (self.window.get_height() - height) // 2))
 
             if hovered and mouse[2][0]:
                 self.restart_game()
+
+    def start_screen(self, mouse, click):
+        self.clear_window()
+        title = self.font.render("Jogo da Memória", True, self.white)
+        button = self.font.render("Jogar", True, self.black)
+
+        button_w, button_h = 300, 100
+        button_x = (self.window.get_width() - button_w) // 2
+        button_y = 500
+
+        hovered = button_x <= mouse[0] <= button_x + button_w and button_y <= mouse[1] <= button_y + button_h
+        color = self.green_light if hovered else self.green
+
+        pg.draw.rect(self.window, color, (button_x, button_y, button_w, button_h))
+        pg.draw.rect(self.window, self.black, (button_x, button_y, button_w, button_h), 5)
+        self.window.blit(title, ((self.window.get_width() - title.get_width()) // 2, 200))
+        self.window.blit(button, ((self.window.get_width() - button.get_width()) // 2, button_y + 25))
+
+        if hovered and click:
+            self.state = "playing"
+            self.restart_game()
 
 
 if __name__ == "__main__":
     jogo = JogoDaMemoria()
 
     while True:
-        jogo.clock.tick(60)  # 60 FPS
+        jogo.clock.tick(60)
 
         for event in pg.event.get():
             if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
@@ -198,17 +214,18 @@ if __name__ == "__main__":
         mouse_pos = pg.mouse.get_pos()
         mouse_input = pg.mouse.get_pressed()
         left_click = mouse_input[0]
-
-        # Detecta clique novo: botão esquerdo foi pressionado agora (True) e não estava pressionado antes
         click_just_pressed = left_click and not jogo.last_left_click
         jogo.last_left_click = left_click
 
-        jogo.clear_window()
-        jogo.shuffling_cards()
-        jogo.board()
-        jogo.card_selection(mouse_pos, click_just_pressed)
-        jogo.card_combinations()
-        jogo.end_of_game()
-        jogo.restart_button((mouse_pos, mouse_input, (click_just_pressed, False, False)))
+        if jogo.state == "start":
+            jogo.start_screen(mouse_pos, click_just_pressed)
+        else:
+            jogo.clear_window()
+            jogo.shuffling_cards()
+            jogo.board()
+            jogo.card_selection(mouse_pos, click_just_pressed)
+            jogo.card_combinations()
+            jogo.end_of_game()
+            jogo.restart_button((mouse_pos, mouse_input, (click_just_pressed, False, False)))
 
         pg.display.update()
