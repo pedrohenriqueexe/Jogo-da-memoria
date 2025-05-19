@@ -6,17 +6,21 @@ import pygame as pg
 class JogoDaMemoria:
     def __init__(self):
         pg.init()  # Inicia o Pygame
-        pg.mixer.init()  # Inicializa o mixer de som
+        pg.mixer.init() 
 
         self.clock = pg.time.Clock()
 
         self.base_path = os.path.dirname(os.path.abspath(__file__))  # Caminho da pasta do script
 
         # Carregar música de fundo
-        self.background_music = "dont_fail.mp3"  # Substitua com o caminho da sua música
+        self.background_music = "dont_fail.mp3"
         pg.mixer.music.load(self.background_music)
-        pg.mixer.music.set_volume(0.5)  # Define o volume da música (0.0 a 1.0)
+        pg.mixer.music.set_volume(0.3)  # Define o volume da música (0.0 a 1.0)
         pg.mixer.music.play(-1, 0.0)  # Começa a música em loop
+
+        # Carregar sons adicionais
+        self.flip_sound = pg.mixer.Sound(os.path.join(self.base_path, "virar_carta.wav"))
+        self.success_sound = pg.mixer.Sound(os.path.join(self.base_path, "acerto_carta.wav"))
 
         # Cores
         self.white = (255, 255, 255)
@@ -133,6 +137,7 @@ class JogoDaMemoria:
                         if click_just_pressed:
                             self.cards[y][x] = self.cards_map[y][x]
                             self.cards_in_play.append((x, y))
+                            self.flip_sound.play()  # Tocar som de virada de carta
                             return
 
     def card_combinations(self):
@@ -147,6 +152,7 @@ class JogoDaMemoria:
             if self.cards_map[y1][x1] == self.cards_map[y2][x2]:
                 self.cards[y1][x1] = ''
                 self.cards[y2][x2] = ''
+                self.success_sound.play()  # Tocar som de acerto
             else:
                 self.cards[y1][x1] = '#'
                 self.cards[y2][x2] = '#'
