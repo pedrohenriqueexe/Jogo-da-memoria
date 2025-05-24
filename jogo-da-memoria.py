@@ -21,6 +21,7 @@ class JogoDaMemoria:
         # Carregar sons adicionais
         self.flip_sound = pg.mixer.Sound(os.path.join(self.base_path, "virar_carta.wav"))
         self.success_sound = pg.mixer.Sound(os.path.join(self.base_path, "acerto_carta.wav"))
+        self.whistle_sound = pg.mixer.Sound(os.path.join(self.base_path, "som_apito.mp3"))
 
         # Cores
         self.white = (255, 255, 255)
@@ -210,6 +211,7 @@ class JogoDaMemoria:
         self.window.blit(button, ((self.window.get_width() - button.get_width()) // 2, button_y + 25))
 
         if hovered and click:
+            self.whistle_sound.play()  # Tocar o som do apito
             self.state = "playing"
             self.restart_game()
 
