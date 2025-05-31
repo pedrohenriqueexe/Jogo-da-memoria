@@ -22,6 +22,7 @@ class JogoDaMemoria:
         self.flip_sound = pg.mixer.Sound(os.path.join(self.base_path, "virar_carta.wav"))
         self.success_sound = pg.mixer.Sound(os.path.join(self.base_path, "acerto_carta.wav"))
         self.whistle_sound = pg.mixer.Sound(os.path.join(self.base_path, "som_apito.mp3"))
+        self.error_sound = pg.mixer.Sound(os.path.join(self.base_path, "erro.mp3"))
 
         # Cores
         self.white = (255, 255, 255)
@@ -157,6 +158,7 @@ class JogoDaMemoria:
             else:
                 self.cards[y1][x1] = '#'
                 self.cards[y2][x2] = '#'
+                self.error_sound.play()  # Som de erro adicionado
 
             self.cards_in_play = []
             self.waiting = False
