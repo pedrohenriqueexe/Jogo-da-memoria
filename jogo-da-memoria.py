@@ -38,6 +38,10 @@ class JogoDaMemoria:
         # Fonte
         self.font = pg.font.SysFont(None, 48)
 
+        self.state = "mode_selection"  # tela inicial agora é seleção de tema
+        self.theme = "times brasileiros"
+        self.theme = "times europeus"
+        
         # Estado do jogo
         self.state = "start"
         self.cards = [['#'] * 5 for _ in range(4)]
@@ -48,6 +52,10 @@ class JogoDaMemoria:
         self.shuffle_cards = True
         self.restart_option = False
         self.last_left_click = False
+        
+        self.load_images()
+        self.load_themes()
+        self.images = self.themes[self.theme]
 
         # Carrega recursos
         self.load_images()
@@ -75,19 +83,42 @@ class JogoDaMemoria:
             print(f"Erro: '{path_up}' não encontrada.")
             self.card_up = pg.Surface((150, 150))
 
-        self.images = {
-            '0': load_image('sport.png'),
-            '1': load_image('vasco.png'),
-            '2': load_image('palmeiras.png'),
-            '3': load_image('flamengo.png'),
-            '4': load_image('santos.png'),
-            '5': load_image('atletico.png'),
-            '6': load_image('botafogo.png'),
-            '7': load_image('bahia.png'),
-            '8': load_image('nautico.png'),
-            '9': load_image('santacruz.png'),
+    def load_themes(self):
+        def load_image(name):
+            path = os.path.join(self.base_path, name)
+            try:
+                return pg.transform.scale(pg.image.load(path), (100, 100))
+            except FileNotFoundError:
+                print(f"Imagem não encontrada: {path}")
+                return pg.Surface((100, 100))
+            
+        self.themes = {
+            'times brasileiros':{
+                '0': load_image('sport.png'),
+                '1': load_image('vasco.png'),
+                '2': load_image('palmeiras.png'),
+                '3': load_image('flamengo.png'),
+                '4': load_image('santos.png'),
+                '5': load_image('atletico.png'),
+                '6': load_image('botafogo.png'),
+                '7': load_image('bahia.png'),
+                '8': load_image('nautico.png'),
+                '9': load_image('santacruz.png'),
+        },
+            'times europeus': {
+                '0': load_image('barcelona.png'),
+                '1': load_image('realmadrid.png'),
+                '2': load_image('inter.png'),
+                '3': load_image('roma.png'),
+                '4': load_image('manchester.png'),
+                '5': load_image('sporting.png'),
+                '6': load_image('milan.png'),
+                '7': load_image('boru.png'),
+                '8': load_image('psg.png'),
+                '9': load_image('atleticomadrid.png'),
+            }
         }
-
+        
     def clear_window(self):
         self.window.fill(self.black)  # Essa parte muda o fundo do jogo
 
@@ -217,6 +248,34 @@ class JogoDaMemoria:
             self.state = "playing"
             self.restart_game()
 
+        def mode_selection_screen(self, mouse, click):
+            self.clear_window()
+        title = self.font.render("Jogo da Memória", True, self.white)
+        self.window.blit(title, ((self.window.get_width() - title.get_width()) // 2, 80))
+ 
+        subtitle = self.font.render("Escolha o Tema", True, self.white)
+        self.window.blit(subtitle, ((self.window.get_width() - subtitle.get_width()) // 2, 140))
+       
+        temas = list(self.themes.keys())
+        button_w, button_h = 300, 100
+        
+        for i, tema in enumerate(temas):
+            x = (self.window.get_width() - button_w) // 2
+            y = 250 + i * 150
+            hovered = x <= mouse[0] <= x + button_w and y <= mouse[1] <= y + button_h
+            color = self.green_light if hovered else self.green
+
+            pg.draw.rect(self.window, color, (x, y, button_w, button_h))
+            pg.draw.rect(self.window, self.black, (x, y, button_w, button_h), 5)
+
+            text = self.font.render(tema.capitalize(), True, self.black)
+            self.window.blit(text, (x + (button_w - text.get_width()) // 2, y + 25))
+            
+            if hovered and click:
+                self.theme = tema
+                self.images = self.themes[self.theme]
+                self.state = "start"
+
 
 if __name__ == "__main__":
     jogo = JogoDaMemoria()
@@ -236,7 +295,9 @@ if __name__ == "__main__":
         click_just_pressed = left_click and not jogo.last_left_click
         jogo.last_left_click = left_click
 
-        if jogo.state == "start":
+        if jogo.state == "mode_selection":
+            jogo.mode_selection_screen(mouse_pos, click_just_pressed)
+        elif jogo.state == "start":
             jogo.start_screen(mouse_pos, click_just_pressed)
         else:
             jogo.clear_window()
