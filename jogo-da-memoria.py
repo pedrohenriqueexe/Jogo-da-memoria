@@ -119,6 +119,20 @@ class JogoDaMemoria:
             }
         }
         
+    def show_congratulations(self):
+         congratulations_text = self.font.render("Você acertou todas as cartas! Vitória conquistada, memória afiada!", True, self.white)
+         text_width, text_height = congratulations_text.get_size()
+         
+         for size in range(50, 300, 2):  # Começa com o tamanho 48 e vai até 100, aumentando de 2 em 2
+          enlarged_font = pg.font.SysFont(None, size)  # Altera o tamanho da fonte
+          enlarged_text = enlarged_font.render("Parabéns,campeão!", True, self.white)
+          text_width, text_height = enlarged_text.get_size()  # Obtém o tamanho do novo texto  
+          
+          self.window.blit(enlarged_text, ((self.window.get_width() - text_width) // 2, (self.window.get_height() - text_height) // 2))
+          pg.display.update()  # Atualiza a tela para exibir a mudança
+          pg.time.delay(50)  # Aguarda 50 milissegundos para dar tempo de exibir a animação
+
+  
     def clear_window(self):
         self.window.fill(self.black)  # Essa parte muda o fundo do jogo
 
@@ -196,8 +210,9 @@ class JogoDaMemoria:
 
     def end_of_game(self):
         if not self.restart_option:
-            if all(self.cards[y][x] == '' for y in range(4) for x in range(5)):
-                self.restart_option = True
+           if all(self.cards[y][x] == '' for y in range(4) for x in range(5)):
+               self.restart_option = True
+               self.show_congratulations()
 
     def restart_game(self):
         self.cards = [['#'] * 5 for _ in range(4)]
@@ -239,7 +254,7 @@ class JogoDaMemoria:
         color = self.green_light if hovered else self.green
 
         pg.draw.rect(self.window, color, (button_x, button_y, button_w, button_h))
-        pg.draw.rect(self.window, self.black, (button_x, button_y, button_w, button_h), 5)
+        pg.draw.rect(self.window, self.white, (button_x, button_y, button_w, button_h), 5)
         self.window.blit(title, ((self.window.get_width() - title.get_width()) // 2, 200))
         self.window.blit(button, ((self.window.get_width() - button.get_width()) // 2, button_y + 25))
 
@@ -250,23 +265,18 @@ class JogoDaMemoria:
 
         def mode_selection_screen(self, mouse, click):
             self.clear_window()
-        title = self.font.render("Jogo da Memória", True, self.white)
-        self.window.blit(title, ((self.window.get_width() - title.get_width()) // 2, 80))
- 
-        subtitle = self.font.render("Escolha o Tema", True, self.white)
-        self.window.blit(subtitle, ((self.window.get_width() - subtitle.get_width()) // 2, 140))
-       
+            
         temas = list(self.themes.keys())
         button_w, button_h = 300, 100
         
         for i, tema in enumerate(temas):
             x = (self.window.get_width() - button_w) // 2
-            y = 250 + i * 150
+            y = 300 + i *100 
             hovered = x <= mouse[0] <= x + button_w and y <= mouse[1] <= y + button_h
-            color = self.green_light if hovered else self.green
+            color = self.white if hovered else self.green
 
             pg.draw.rect(self.window, color, (x, y, button_w, button_h))
-            pg.draw.rect(self.window, self.black, (x, y, button_w, button_h), 5)
+            pg.draw.rect(self.window, self.white, (x, y, button_w, button_h), 5) #aqui eu defino a borda
 
             text = self.font.render(tema.capitalize(), True, self.black)
             self.window.blit(text, (x + (button_w - text.get_width()) // 2, y + 25))
@@ -305,7 +315,7 @@ if __name__ == "__main__":
             jogo.board()
             jogo.card_selection(mouse_pos, click_just_pressed)
             jogo.card_combinations()
-            jogo.end_of_game()
+            jogo.end_of_game()  # **Chama a função para verificar se o jogo acabou e exibir a animação de parabéns**
             jogo.restart_button((mouse_pos, mouse_input, (click_just_pressed, False, False)))
 
         pg.display.update()
